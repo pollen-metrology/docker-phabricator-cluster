@@ -4,6 +4,17 @@ For most basic setups, you can use environment variables to configure the Phabri
 
 A full list of all available environment variables can be found in the [Full Environment Variable List](ENV-LIST.md).
 
+# Configuring GIT user
+
+```
+docker run ... \
+    --env GIT_USER="John Doe" \
+    --env GIT_EMAIL="jd@foo.com" \
+    --env GIT_EDITOR=/usr/bin/vim \
+    ...
+```
+
+
 # Configuring MySQL
 
 You need to do this before running the container, or things won't work.  If you have MySQL running in another container, you can use `MYSQL_HOST`, like so:
