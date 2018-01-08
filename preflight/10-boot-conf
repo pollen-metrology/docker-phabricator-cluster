@@ -293,3 +293,14 @@ if [ "$SCRIPT_AFTER_MIGRATION" != "" ]; then
   popd
 fi
 
+# activate 
+pushd /srv/phabricator/phabricator
+bin/config set phabricator.show-prototypes true
+popd
+
+# liberate code
+pushd /srv/phabricator/phabricator
+../arcanist/bin/arc liberate src
+popd
+
+
