@@ -13,6 +13,8 @@ docker run \
     --env MYSQL_HOST=10.0.0.1 \
     --env MYSQL_USER=user \
     --env MYSQL_PASS=pass \
+    --env PHABRICATOR_DAEMON_USER=phab-daemon \
+    --env PHABRICATOR_VCS_USER=vcs-user \
     --env PHABRICATOR_REPOSITORY_PATH=/repos \
     -v /host/repo/path:/repos \
     redpointgames/phabricator

@@ -9,11 +9,11 @@ source /config.saved
 if [ ! -f /baked ]; then
   # Touch log file and PID file to make sure they're writable
   touch /var/log/aphlict.log
-  chown "$PHABRICATOR_VCS_USER:wwwgrp-phabricator" /var/log/aphlict.log
+  chown "$PHABRICATOR_DAEMON_USER:wwwgrp-phabricator" /var/log/aphlict.log
 
   # Copy ws module from global install
   cp -Rv /usr/lib/node_modules /srv/phabricator/phabricator/support/aphlict/server/
-  chown -Rv "$PHABRICATOR_VCS_USER:wwwgrp-phabricator" /srv/phabricator/phabricator/support/aphlict/server/node_modules
+  chown -Rv "$PHABRICATOR_DAEMON_USER:wwwgrp-phabricator" /srv/phabricator/phabricator/support/aphlict/server/node_modules
 
   # Configure the Phabricator notification server
   cat >/srv/aphlict.conf <<EOF
@@ -52,7 +52,7 @@ fi
 if [ ! -f /is-baking ]; then
   # Start the Phabricator notification server
   pushd /srv/phabricator/phabricator
-  sudo -u "$PHABRICATOR_VCS_USER" bin/aphlict start --config=/srv/aphlict.conf
+  sudo -u "$PHABRICATOR_DAEMON_USER" bin/aphlict start --config=/srv/aphlict.conf
   popd
 
   set +e

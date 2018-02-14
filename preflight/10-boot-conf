@@ -43,7 +43,14 @@ if [ "$SSL_TYPE" == "" ]; then
   SSL_TYPE=none
 fi
 if [ "$PHABRICATOR_VCS_USER" == "" ]; then
-  PHABRICATOR_VCS_USER=git
+  PHABRICATOR_VCS_USER=vcs-user
+fi
+if [ "$PHABRICATOR_DAEMON_USER" == "" ]; then
+  PHABRICATOR_DAEMON_USER=phab-daemon
+fi
+
+if [ "$PHABRICATOR_WWW_USER" == "" ]; then
+  PHABRICATOR_WWW_USER=www-data
 fi
 
 if [ "$PHABRICATOR_STORAGE_TYPE" == "" ]; then
@@ -96,6 +103,9 @@ fi
 
 set +x
 cat >/config.saved <<EOF
+PHABRICATOR_VCS_USER="$PHABRICATOR_VCS_USER"
+PHABRICATOR_WWW_USER="$PHABRICATOR_WWW_USER"
+PHABRICATOR_DAEMON_USER="$PHABRICATOR_DAEMON_USER"
 OVERRIDE_PHABRICATOR_URI="$OVERRIDE_PHABRICATOR_URI"
 OVERRIDE_PHABRICATOR_BRANCH="$OVERRIDE_PHABRICATOR_BRANCH"
 OVERRIDE_ARCANIST_URI="$OVERRIDE_ARCANIST_URI"
@@ -108,7 +118,6 @@ PHABRICATOR_REPOSITORY_PATH="$PHABRICATOR_REPOSITORY_PATH"
 PHABRICATOR_STORAGE_TYPE="$PHABRICATOR_STORAGE_TYPE"
 PHABRICATOR_STORAGE_PATH="$PHABRICATOR_STORAGE_PATH"
 PHABRICATOR_STORAGE_BUCKET="$PHABRICATOR_STORAGE_BUCKET"
-PHABRICATOR_VCS_USER="$PHABRICATOR_VCS_USER"
 PHABRICATOR_VCS_PORT="$PHABRICATOR_VCS_PORT"
 PHABRICATOR_HOST_KEYS_PATH="$PHABRICATOR_HOST_KEYS_PATH"
 AWS_S3_ACCESS_KEY="$AWS_S3_ACCESS_KEY"
@@ -143,12 +152,16 @@ set -x
 # Reload configuration
 source /config.saved
 
-# Update the PHABRICATOR_VCS_USER in config files
-sed -i "s/PHABRICATOR/$PHABRICATOR_VCS_USER/g" /etc/passwd
+# Update the PHABRICATOR_*_USER in config files
+sed -i "s/PHABRICATOR_DAEMON_USER/$PHABRICATOR_DAEMON_USER/g" /etc/passwd
+sed -i "s/PHABRICATOR_VCS_USER/$PHABRICATOR_VCS_USER/g" /etc/passwd
+sed -i "s/PHABRICATOR_WWW_USER/$PHABRICATOR_WWW_USER/g" /etc/passwd
 sed "s/__PHABRICATOR_VCS_USER__/$PHABRICATOR_VCS_USER/g" /etc/phabricator-ssh/sshd_config.phabricator.template > /etc/phabricator-ssh/sshd_config.phabricator
 sed "s/__PHABRICATOR_VCS_USER__/$PHABRICATOR_VCS_USER/g" /etc/phabricator-ssh/phabricator-ssh-hook.sh.template > /etc/phabricator-ssh/phabricator-ssh-hook.sh
-sed "s/__PHABRICATOR_VCS_USER__/$PHABRICATOR_VCS_USER/g" /etc/php5/fpm/php-fpm.conf.template > /etc/php5/fpm/php-fpm.conf
+sed "s/__PHABRICATOR_WWW_USER__/$PHABRICATOR_WWW_USER/g" /etc/php5/fpm/php-fpm.conf.template > /etc/php5/fpm/php-fpm.conf
+
 chmod 755 /etc/phabricator-ssh/phabricator-ssh-hook.sh
+
 
 # Set up Phabricator
 if [ "$SCRIPT_BEFORE_UPDATE" != "" ]; then
@@ -160,98 +173,98 @@ fi
 if [ "$ENABLE_UPDATE_ON_START" == "true" ]; then
   pushd /srv/phabricator/libphutil
   if [ "$OVERRIDE_LIBPHUTIL_URI" != "" ]; then
-    sudo -u "$PHABRICATOR_VCS_USER" git remote set-url origin $OVERRIDE_LIBPHUTIL_URI
+    git remote set-url origin $OVERRIDE_LIBPHUTIL_URI
   fi
-  sudo -u "$PHABRICATOR_VCS_USER" git fetch --all
+  git fetch --all
   if [ "$OVERRIDE_LIBPHUTIL_BRANCH" != "" ]; then
-    sudo -u "$PHABRICATOR_VCS_USER" git checkout $OVERRIDE_LIBPHUTIL_BRANCH
+    git checkout $OVERRIDE_LIBPHUTIL_BRANCH
   else
-    sudo -u "$PHABRICATOR_VCS_USER" git pull
+    git pull
   fi
   popd
 
   pushd /srv/phabricator/arcanist
   if [ "$OVERRIDE_ARCANIST_URI" != "" ]; then
-    sudo -u "$PHABRICATOR_VCS_USER" git remote set-url origin $OVERRIDE_ARCANIST_URI
+    git remote set-url origin $OVERRIDE_ARCANIST_URI
   fi
-  sudo -u "$PHABRICATOR_VCS_USER" git fetch --all
+  git fetch --all
   if [ "$OVERRIDE_ARCANIST_BRANCH" != "" ]; then
-    sudo -u "$PHABRICATOR_VCS_USER" git checkout $OVERRIDE_ARCANIST_BRANCH
+    git checkout $OVERRIDE_ARCANIST_BRANCH
   else
-    sudo -u "$PHABRICATOR_VCS_USER" git pull
+    git pull
   fi
   popd
 
   pushd /srv/phabricator/phabricator
   if [ "$OVERRIDE_PHABRICATOR_URI" != "" ]; then
-    sudo -u "$PHABRICATOR_VCS_USER" git remote set-url origin $OVERRIDE_PHABRICATOR_URI
+    git remote set-url origin $OVERRIDE_PHABRICATOR_URI
   fi
-  sudo -u "$PHABRICATOR_VCS_USER" git fetch --all
+  git fetch --all
   if [ "$OVERRIDE_PHABRICATOR_BRANCH" != "" ]; then
-    sudo -u "$PHABRICATOR_VCS_USER" git checkout $OVERRIDE_PHABRICATOR_BRANCH
+    git checkout $OVERRIDE_PHABRICATOR_BRANCH
   else
-    sudo -u "$PHABRICATOR_VCS_USER" git pull
+    git pull
   fi
   popd
 fi
 
 pushd /srv/phabricator/phabricator
 if [ "$MYSQL_HOST" != "" ]; then
-  sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set mysql.host "$MYSQL_HOST"
+  ./bin/config set mysql.host "$MYSQL_HOST"
 fi
 if [ "$MYSQL_PORT" != "" ]; then
-  sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set mysql.port "$MYSQL_PORT"
+  ./bin/config set mysql.port "$MYSQL_PORT"
 fi
 if [ "$MYSQL_USER" != "" ]; then
-  sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set mysql.user "$MYSQL_USER"
+  ./bin/config set mysql.user "$MYSQL_USER"
 fi
 set +x
 if [ "$MYSQL_PASS" != "" ]; then
-  sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set mysql.pass "$MYSQL_PASS"
+  ./bin/config set mysql.pass "$MYSQL_PASS"
 fi
 set -x
 if [ "$MYSQL_STORAGE_NAMESPACE" != "" ]; then
-  sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set storage.default-namespace "$MYSQL_STORAGE_NAMESPACE"
+  ./bin/config set storage.default-namespace "$MYSQL_STORAGE_NAMESPACE"
 fi
 if [ "$PHABRICATOR_HOST" != "" ]; then
   if [ "$SSL_TYPE" == "none" ]; then
-    sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set phabricator.base-uri "http://$PHABRICATOR_HOST/"
+    ./bin/config set phabricator.base-uri "http://$PHABRICATOR_HOST/"
   else
-    sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set phabricator.base-uri "https://$PHABRICATOR_HOST/"
+    ./bin/config set phabricator.base-uri "https://$PHABRICATOR_HOST/"
   fi
 fi
 if [ "$PHABRICATOR_CDN" != "" ]; then
   if [ "$SSL_TYPE" == "none" ]; then
-    sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set security.alternate-file-domain "http://$PHABRICATOR_CDN/"
+    ./bin/config set security.alternate-file-domain "http://$PHABRICATOR_CDN/"
   else
-    sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set security.alternate-file-domain "https://$PHABRICATOR_CDN/"
+    ./bin/config set security.alternate-file-domain "https://$PHABRICATOR_CDN/"
   fi
 fi
 if [ "$PHABRICATOR_VCS_PORT" != "" ]; then
-    sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set diffusion.ssh-port "$PHABRICATOR_VCS_PORT"
+    ./bin/config set diffusion.ssh-port "$PHABRICATOR_VCS_PORT"
 fi
-sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set phd.user "$PHABRICATOR_VCS_USER"
-sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set diffusion.ssh-user "$PHABRICATOR_VCS_USER"
-sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set pygments.enabled true
+./bin/config set phd.user "$PHABRICATOR_DAEMON_USER"
+./bin/config set diffusion.ssh-user "$PHABRICATOR_VCS_USER"
+./bin/config set pygments.enabled true
 if [ "$PHABRICATOR_REPOSITORY_PATH" != "" ]; then
-  sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set repository.default-local-path "$PHABRICATOR_REPOSITORY_PATH"
+  ./bin/config set repository.default-local-path "$PHABRICATOR_REPOSITORY_PATH"
 fi
 if [ "$PHABRICATOR_STORAGE_TYPE" == "mysql" ]; then
-  sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set storage.mysql-engine.max-size 67108864
+  ./bin/config set storage.mysql-engine.max-size 67108864
 fi
 if [ "$PHABRICATOR_STORAGE_TYPE" == "disk" ]; then
-  sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set storage.mysql-engine.max-size 0
-  sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set storage.local-disk.path "$PHABRICATOR_STORAGE_PATH"
+  ./bin/config set storage.mysql-engine.max-size 0
+  ./bin/config set storage.local-disk.path "$PHABRICATOR_STORAGE_PATH"
 fi
 if [ "$PHABRICATOR_STORAGE_TYPE" == "s3" ]; then
-  sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set storage.mysql-engine.max-size 0
-  sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set storage.s3.bucket "$PHABRICATOR_STORAGE_BUCKET"
+  ./bin/config set storage.mysql-engine.max-size 0
+  ./bin/config set storage.s3.bucket "$PHABRICATOR_STORAGE_BUCKET"
 fi
 if [ "$AWS_S3_ACCESS_KEY" != "" ]; then
-  sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set amazon-s3.access-key "$AWS_S3_ACCESS_KEY"
+  ./bin/config set amazon-s3.access-key "$AWS_S3_ACCESS_KEY"
 fi
 if [ "$AWS_S3_SECRET_KEY" != "" ]; then
-  sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set amazon-s3.secret-key "$AWS_S3_SECRET_KEY"
+  ./bin/config set amazon-s3.secret-key "$AWS_S3_SECRET_KEY"
 fi
 if [ "$SSL_TYPE" == "none" ]; then
   APHLICT_PROTOCOL="http"
@@ -260,7 +273,7 @@ else
   APHLICT_PROTOCOL="https"
   APHLICT_PORT=443
 fi
-sudo -u "$PHABRICATOR_VCS_USER" ./bin/config set notification.servers '[{"type": "client","host": "'$PHABRICATOR_HOST'","port": '$APHLICT_PORT',"protocol": "'$APHLICT_PROTOCOL'","path": "/ws/"},{"type": "admin","host": "127.0.0.1","port": 22281,"protocol": "http"}]'
+./bin/config set notification.servers '[{"type": "client","host": "'$PHABRICATOR_HOST'","port": '$APHLICT_PORT',"protocol": "'$APHLICT_PROTOCOL'","path": "/ws/"},{"type": "admin","host": "127.0.0.1","port": 22281,"protocol": "http"}]'
 unset APHLICT_PROTOCOL
 unset APHLICT_PORT
 popd
@@ -298,9 +311,13 @@ pushd /srv/phabricator/phabricator
 bin/config set phabricator.show-prototypes true
 popd
 
-# liberate code
-pushd /srv/phabricator/phabricator
-../arcanist/bin/arc liberate src
-popd
+rm /srv/phabricator/phabricator/conf/local/local.json
+ln -s /config/local.json /srv/phabricator/phabricator/conf/local/local.json
 
+PHABRICATOR_HOST_KEY=/config/host.key
+if [ -f "$PHABRICATOR_HOST_KEY" ]; then
+ /srv/phabricator/phabricator/bin/almanac register \
+  --device $PHABRICATOR_HOST \
+  --private-key $PHABRICATOR_HOST_KEY
+fi
 

@@ -12,7 +12,7 @@ if [ ! -f /is-baking ]; then
 
   # Start the Phabricator daemons
   pushd /srv/phabricator/phabricator
-  sudo -u "$PHABRICATOR_VCS_USER" bin/phd restart --force
+  sudo -u "$PHABRICATOR_DAEMON_USER" bin/phd restart --force
 
   if [ "$SCRIPT_AFTER_DAEMONS" != "" ]; then
     pushd /srv/phabricator/phabricator

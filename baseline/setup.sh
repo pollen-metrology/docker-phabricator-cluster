@@ -44,19 +44,18 @@ zypper --non-interactive install -f cronie
 # Create users and groups
 echo "nginx:x:497:495:user for nginx:/var/lib/nginx:/bin/false" >> /etc/passwd
 echo "nginx:!:495:" >> /etc/group
-echo "PHABRICATOR:x:2000:2000:user for phabricator:/srv/phabricator:/bin/bash" >> /etc/passwd
-echo "wwwgrp-phabricator:!:2000:nginx" >> /etc/group
+echo "PHABRICATOR_VCS_USER:x:2000:2000:user for phabricator vcs access:/srv/phabricator:/bin/bash" >> /etc/passwd
+echo "PHABRICATOR_DAEMON_USER:x:2001:2000:user for phabricator daemons:/srv/phabricator:/bin/bash" >> /etc/passwd
+echo "PHABRICATOR_WWW_USER:x:2002:2000:user for phabricator web service:/srv/phabricator:/bin/bash" >> /etc/passwd
+echo "wwwgrp-phabricator:!:2000:nginx,PHABRICATOR_VCS_USER,PHABRICATOR_DAEMON_USER,PHABRICATOR_WWW_USER" >> /etc/group
 
 # Set up the Phabricator code base
 mkdir /srv/phabricator
-chown PHABRICATOR:wwwgrp-phabricator /srv/phabricator
 cd /srv/phabricator
-sudo -u PHABRICATOR git clone https://www.github.com/phacility/libphutil.git /srv/phabricator/libphutil
-sudo -u PHABRICATOR git clone https://www.github.com/phacility/arcanist.git /srv/phabricator/arcanist
-sudo -u PHABRICATOR git clone https://www.github.com/pollen-metrology/phabricator.git /srv/phabricator/phabricator
-sudo -u PHABRICATOR git clone https://www.github.com/PHPOffice/PHPExcel.git /srv/phabricator/PHPExcel
-arcanist/bin/arc liberate /srv/phabricator/phabricator/src
-
+git clone https://www.github.com/phacility/libphutil.git /srv/phabricator/libphutil
+git clone https://www.github.com/phacility/arcanist.git /srv/phabricator/arcanist
+git clone https://www.github.com/phacility/phabricator.git /srv/phabricator/phabricator
+git clone https://www.github.com/PHPOffice/PHPExcel.git /srv/phabricator/PHPExcel
 
 cd /
 
