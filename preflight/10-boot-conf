@@ -281,11 +281,11 @@ fi
 
 # The search database may need to be repaired, and if so, will prevent bin/storage upgrade from working
 # so preemptively run a repair on that database now.
-set +x
-mysqlcheck --host="$MYSQL_HOST" --port="$MYSQL_PORT" --user="$MYSQL_USER" --password="$MYSQL_PASS" --databases "${MYSQL_STORAGE_NAMESPACE}_search" || true
-set -x
+#set +x
+#mysqlcheck --host="$MYSQL_HOST" --port="$MYSQL_PORT" --user="$MYSQL_USER" --password="$MYSQL_PASS" --databases "${MYSQL_STORAGE_NAMESPACE}_search" || true
+#set -x
 
-/srv/phabricator/phabricator/bin/storage upgrade --force
+#/srv/phabricator/phabricator/bin/storage upgrade --force
 
 if [ "$SCRIPT_AFTER_MIGRATION" != "" ]; then
   pushd /srv/phabricator/phabricator
