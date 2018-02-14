@@ -53,8 +53,11 @@ chown PHABRICATOR:wwwgrp-phabricator /srv/phabricator
 cd /srv/phabricator
 sudo -u PHABRICATOR git clone https://www.github.com/phacility/libphutil.git /srv/phabricator/libphutil
 sudo -u PHABRICATOR git clone https://www.github.com/phacility/arcanist.git /srv/phabricator/arcanist
-sudo -u PHABRICATOR git clone https://www.github.com/phacility/phabricator.git /srv/phabricator/phabricator
+sudo -u PHABRICATOR git clone https://www.github.com/pollen-metrology/phabricator.git /srv/phabricator/phabricator
 sudo -u PHABRICATOR git clone https://www.github.com/PHPOffice/PHPExcel.git /srv/phabricator/PHPExcel
+arcanist/bin/arc liberate /srv/phabricator/phabricator/src
+
+
 cd /
 
 # Clone Let's Encrypt
