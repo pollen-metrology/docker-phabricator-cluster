@@ -184,8 +184,8 @@ if [ "$ENABLE_UPDATE_ON_START" == "true" ]; then
   fi
   git fetch --all
   if [ "$OVERRIDE_LIBPHUTIL_BRANCH" != "" ]; then
+    git branch -m backup_branch
     git checkout $OVERRIDE_LIBPHUTIL_BRANCH
-    git reset --hard
   fi
   git pull
   popd
@@ -196,8 +196,8 @@ if [ "$ENABLE_UPDATE_ON_START" == "true" ]; then
   fi
   git fetch --all
   if [ "$OVERRIDE_ARCANIST_BRANCH" != "" ]; then
+    git branch -m backup_branch
     git checkout $OVERRIDE_ARCANIST_BRANCH
-    git reset --hard
   fi
   git pull
   popd
@@ -208,8 +208,9 @@ if [ "$ENABLE_UPDATE_ON_START" == "true" ]; then
   fi
   git fetch --all
   if [ "$OVERRIDE_PHABRICATOR_BRANCH" != "" ]; then
+    git branch -m backup_branch
     git checkout $OVERRIDE_PHABRICATOR_BRANCH
-    git reset --hard
+    
   fi
   git pull
   popd
@@ -346,6 +347,7 @@ if [ "$SCRIPT_AFTER_MIGRATION" != "" ]; then
 fi
 
 # allow to see/update config file from outside the container
+rm -f /config/local.json
 ln -s /srv/phabricator/phabricator/conf/local/local.json  /config/local.json
 
 # Polish users
@@ -353,7 +355,7 @@ sudo usermod -p NP $PHABRICATOR_VCS_USER
 sudo usermod -s /bin/sh $PHABRICATOR_VCS_USER
 
 GIT_COMMANDS="/usr/bin/git,/usr/bin/git-upload-pack,/usr/bin/git-receive-pack,/usr/bin/ssh"
-echo "$PHABRICATOR_VCS_USER ALL=($PHABRICATOR_DAEMON_USER) NOPASSWD:/bin/ls,$GIT_COMMANDS" \
+echo "$PHABRICATOR_VCS_USER ALL=($PHABRICATOR_DAEMON_USER) SETENV: NOPASSWD:/bin/ls,$GIT_COMMANDS" \
 	> /etc/sudoers.d/phabricator
-echo "$PHABRICATOR_WWW_USER ALL=($PHABRICATOR_DAEMON_USER) NOPASSWD:$GIT_COMMANDS" \
+echo "$PHABRICATOR_WWW_USER ALL=($PHABRICATOR_DAEMON_USER) SETENV: NOPASSWD:$GIT_COMMANDS" \
 	>> /etc/sudoers.d/phabricator
