@@ -120,6 +120,12 @@ PHABRICATOR_STORAGE_PATH="$PHABRICATOR_STORAGE_PATH"
 PHABRICATOR_STORAGE_BUCKET="$PHABRICATOR_STORAGE_BUCKET"
 PHABRICATOR_VCS_PORT="$PHABRICATOR_VCS_PORT"
 PHABRICATOR_HOST_KEYS_PATH="$PHABRICATOR_HOST_KEYS_PATH"
+PHABRICATOR_ALLOW_HTTP_AUTH="$PHABRICATOR_ALLOW_HTTP_AUTH"
+PHABRICATOR_CLUSTER_DATABASE_JSON="$PHABRICATOR_CLUSTER_DATABASE_JSON"
+PHABRICATOR_CLUSTER_MAILER_JSON="$PHABRICATOR_CLUSTER_MAILER_JSON"
+PHABRICATOR_CLUSTER_ADDRESSES_JSON="$PHABRICATOR_CLUSTER_ADDRESSES_JSON"
+PHABRICATOR_CLUSTER_DEVICE_KEY="$PHABRICATOR_CLUSTER_DEVICE_KEY"
+PHABRICATOR_ENV_APPEND_PATH_JSON="$PHABRICATOR_ENV_APPEND_PATH_JSON"
 AWS_S3_ACCESS_KEY="$AWS_S3_ACCESS_KEY"
 AWS_S3_SECRET_KEY="$AWS_S3_SECRET_KEY"
 MYSQL_HOST="$MYSQL_HOST"
@@ -146,6 +152,7 @@ DISABLE_IOMONITOR="$DISABLE_IOMONITOR"
 GIT_EMAIL="$GIT_EMAIL"
 GIT_USER="$GIT_USER"
 GIT_EDITOR="$GIT_EDITOR"
+UPGRADE_STORAGE="$UPGRADE_STORAGE"
 EOF
 set -x
 
@@ -178,9 +185,9 @@ if [ "$ENABLE_UPDATE_ON_START" == "true" ]; then
   git fetch --all
   if [ "$OVERRIDE_LIBPHUTIL_BRANCH" != "" ]; then
     git checkout $OVERRIDE_LIBPHUTIL_BRANCH
-  else
-    git pull
+    git reset --hard
   fi
+  git pull
   popd
 
   pushd /srv/phabricator/arcanist
@@ -190,9 +197,9 @@ if [ "$ENABLE_UPDATE_ON_START" == "true" ]; then
   git fetch --all
   if [ "$OVERRIDE_ARCANIST_BRANCH" != "" ]; then
     git checkout $OVERRIDE_ARCANIST_BRANCH
-  else
-    git pull
+    git reset --hard
   fi
+  git pull
   popd
 
   pushd /srv/phabricator/phabricator
@@ -202,9 +209,9 @@ if [ "$ENABLE_UPDATE_ON_START" == "true" ]; then
   git fetch --all
   if [ "$OVERRIDE_PHABRICATOR_BRANCH" != "" ]; then
     git checkout $OVERRIDE_PHABRICATOR_BRANCH
-  else
-    git pull
+    git reset --hard
   fi
+  git pull
   popd
 fi
 
@@ -266,6 +273,34 @@ fi
 if [ "$AWS_S3_SECRET_KEY" != "" ]; then
   ./bin/config set amazon-s3.secret-key "$AWS_S3_SECRET_KEY"
 fi
+
+if [ "$PHABRICATOR_ALLOW_HTTP_AUTH" != "" ]; then
+	./bin/config set diffusion.allow-http-auth "$PHABRICATOR_ALLOW_HTTP_AUTH"
+fi
+
+if [ "$PHABRICATOR_CLUSTER_DATABASE_JSON" != "" ]; then
+	./bin/config set cluster.databases --stdin < $PHABRICATOR_CLUSTER_DATABASE_JSON
+fi
+
+if [ "$PHABRICATOR_CLUSTER_MAILER_JSON" != "" ]; then
+	./bin/config set cluster.mailers --stdin < $PHABRICATOR_CLUSTER_MAILER_JSON
+fi
+
+if [ "$PHABRICATOR_CLUSTER_ADDRESSES_JSON" != "" ]; then
+	./bin/config set cluster.addresses --stdin < $PHABRICATOR_CLUSTER_ADDRESSES_JSON
+fi
+
+if [ "$PHABRICATOR_ENV_APPEND_PATH_JSON" != "" ]; then
+	./bin/config set environment.append-paths --stdin < $PHABRICATOR_ENV_APPEND_PATH_JSON
+fi
+
+if [ "$PHABRICATOR_CLUSTER_DEVICE_KEY" != "" ]; then
+ /srv/phabricator/phabricator/bin/almanac register \
+  --device $PHABRICATOR_HOST \
+  --private-key $PHABRICATOR_CLUSTER_DEVICE_KEY
+fi
+
+
 if [ "$SSL_TYPE" == "none" ]; then
   APHLICT_PROTOCOL="http"
   APHLICT_PORT=80
@@ -290,20 +325,13 @@ if [ "$SCRIPT_BEFORE_MIGRATION" != "" ]; then
   popd
 fi
 
-
-
-# The search database may need to be repaired, and if so, will prevent bin/storage upgrade from working
-# so preemptively run a repair on that database now.
-#set +x
-#mysqlcheck --host="$MYSQL_HOST" --port="$MYSQL_PORT" --user="$MYSQL_USER" --password="$MYSQL_PASS" --databases "${MYSQL_STORAGE_NAMESPACE}_search" || true
-#set -x
-
-#/srv/phabricator/phabricator/bin/storage upgrade --force
-
-if [ "$SCRIPT_AFTER_MIGRATION" != "" ]; then
-  pushd /srv/phabricator/phabricator
-  $SCRIPT_AFTER_MIGRATION
-  popd
+if [ "$UPGRADE_STORAGE" == "true" || "$UPGRADE_STORAGE" == "yes" ]; then
+  # The search database may need to be repaired, and if so, will prevent bin/storage upgrade from working
+  # so preemptively run a repair on that database now.
+  set +x
+  mysqlcheck --host="$MYSQL_HOST" --port="$MYSQL_PORT" --user="$MYSQL_USER" --password="$MYSQL_PASS" --databases "${MYSQL_STORAGE_NAMESPACE}_search" || true
+  set -x
+  /srv/phabricator/phabricator/bin/storage upgrade --force
 fi
 
 # activate 
@@ -311,13 +339,21 @@ pushd /srv/phabricator/phabricator
 bin/config set phabricator.show-prototypes true
 popd
 
-rm /srv/phabricator/phabricator/conf/local/local.json
-ln -s /config/local.json /srv/phabricator/phabricator/conf/local/local.json
-
-PHABRICATOR_HOST_KEY=/config/host.key
-if [ -f "$PHABRICATOR_HOST_KEY" ]; then
- /srv/phabricator/phabricator/bin/almanac register \
-  --device $PHABRICATOR_HOST \
-  --private-key $PHABRICATOR_HOST_KEY
+if [ "$SCRIPT_AFTER_MIGRATION" != "" ]; then
+  pushd /srv/phabricator/phabricator
+  $SCRIPT_AFTER_MIGRATION
+  popd
 fi
 
+# allow to see/update config file from outside the container
+ln -s /srv/phabricator/phabricator/conf/local/local.json  /config/local.json
+
+# Polish users
+sudo usermod -p NP $PHABRICATOR_VCS_USER
+sudo usermod -s /bin/sh $PHABRICATOR_VCS_USER
+
+GIT_COMMANDS="/usr/bin/git,/usr/bin/git-upload-pack,/usr/bin/git-receive-pack,/usr/bin/ssh"
+echo "$PHABRICATOR_VCS_USER ALL=($PHABRICATOR_DAEMON_USER) NOPASSWD:/bin/ls,$GIT_COMMANDS" \
+	> /etc/sudoers.d/phabricator
+echo "$PHABRICATOR_WWW_USER ALL=($PHABRICATOR_DAEMON_USER) NOPASSWD:$GIT_COMMANDS" \
+	>> /etc/sudoers.d/phabricator
