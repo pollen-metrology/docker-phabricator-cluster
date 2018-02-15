@@ -42,4 +42,10 @@ The following advanced options allow you to run custom scripts during stages of 
 - `SCRIPT_AFTER_LETS_ENCRYPT` - Occurs after Let's Encrypt has registered domains.  You can use this script to register additional domains that aren't specified by `PHABRICATOR_HOST` or `PHABRICATOR_CDN`.  This only runs if SSL is set to the Let's Encrypt mode.
 - `SCRIPT_BEFORE_DAEMONS` - Occurs before background daemons are launched.
 - `SCRIPT_AFTER_DAEMONS` - Occurs after background daemons are launched.  You can use this to launch additional daemons.
-
+- `PHABRICATOR_ALLOW_HTTP_AUTH` - Sets the diffusion.allow-http-auth config key
+- `PHABRICATOR_CLUSTER_DATABASE_JSON` - Sets cluster.databases config key. Expects a JSON file.
+- `PHABRICATOR_CLUSTER_MAILER_JSON` - Sets cluster.mailers config key. Expects a JSON file.
+- `PHABRICATOR_CLUSTER_ADDRESSES_JSON` - Sets cluster.addresses config key. Expects a JSON file.
+- `PHABRICATOR_CLUSTER_DEVICE_KEY` - Give path to the private key to be used for this cluster device registration. The key is provided by Almanac application, in Phabricator.
+- `UPGRADE_STORAGE` - Tell the container to upgrade the storage when booting. Do not activate this in cluster setup.
+- `PHABRICATOR_ENV_APPEND_PATH_JSON` - Sets environment.append-paths config key. Add some paths to the Phabricator environment.
