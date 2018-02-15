@@ -2,6 +2,8 @@
 
 This is a Docker image which provides a fully configured Phabricator image, including SSH connectivity to repositories, real-time notifications via Web Sockets and all of the other parts that are normally difficult to configure done for you.
 
+This image is a fork of a [RedpointGames image](https://github.com/RedpointGames/phabricator), which enhancements for cluster configuration.
+
 You'll need an instance of MySQL for this Docker image to connect to, and for basic setups you can specify it with either the `MYSQL_LINKED_CONTAINER` or `MYSQL_HOST` environment variables, depending on where your instance of MySQL is.
 
 The most basic command to run Phabricator is:
