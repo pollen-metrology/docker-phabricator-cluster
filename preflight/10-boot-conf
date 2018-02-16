@@ -346,10 +346,6 @@ if [ "$SCRIPT_AFTER_MIGRATION" != "" ]; then
   popd
 fi
 
-# allow to see/update config file from outside the container
-rm -f /config/local.json
-ln -s /srv/phabricator/phabricator/conf/local/local.json  /config/local.json
-
 # Polish users
 sudo usermod -p NP $PHABRICATOR_VCS_USER
 sudo usermod -s /bin/sh $PHABRICATOR_VCS_USER
