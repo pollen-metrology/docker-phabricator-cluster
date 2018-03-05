@@ -327,7 +327,7 @@ if [ "$SCRIPT_BEFORE_MIGRATION" != "" ]; then
   popd
 fi
 
-if [ "$UPGRADE_STORAGE" == "true" || "$UPGRADE_STORAGE" == "yes" ]; then
+if [ "$UPGRADE_STORAGE" != "" ]; then
   # The search database may need to be repaired, and if so, will prevent bin/storage upgrade from working
   # so preemptively run a repair on that database now.
   set +x
