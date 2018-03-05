@@ -1,6 +1,6 @@
 # Full Environment Variable Reference
 
-- `PHABRICATOR_HOST` - The domain name for the Phabricator host (e.g. "mydomain.com").
+- `PHABRICATOR_HOST` - The FQDN which is served by this Phabricator (standalone setu) of by the whole cluster (cluster setup).
 - `PHABRICATOR_CDN` - The domain name to use for serving files and other user content (optional, but recommended).
 - `PHABRICATOR_REPOSITORY_PATH` - The path to store repository data in.  This directory should be a volume mapped from the host, otherwise repository data will be lost when the container is destroyed.
 - `PHABRICATOR_STORAGE_TYPE` - The type of storage to use for files.  Defaults to `mysql`, but you can set it to `disk` or `s3` for alterate storage options (see [Basic Configuration](BASIC-CONFIG.md)).
@@ -47,5 +47,6 @@ The following advanced options allow you to run custom scripts during stages of 
 - `PHABRICATOR_CLUSTER_MAILER_JSON` - Sets cluster.mailers config key. Expects a JSON file.
 - `PHABRICATOR_CLUSTER_ADDRESSES_JSON` - Sets cluster.addresses config key. Expects a JSON file.
 - `PHABRICATOR_CLUSTER_DEVICE_KEY` - Give path to the private key to be used for this cluster device registration. The key is provided by Almanac application, in Phabricator.
+- `PHABRICATOR_CLUSTER_DEVICE_HOST` - When setting up a cluster node, this is the node identifier.
 - `UPGRADE_STORAGE` - Tell the container to upgrade the storage when booting. Do not activate this in cluster setup.
 - `PHABRICATOR_ENV_APPEND_PATH_JSON` - Sets environment.append-paths config key. Add some paths to the Phabricator environment.
