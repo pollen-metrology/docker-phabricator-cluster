@@ -7,7 +7,6 @@ MYSQL_HOST="localhost"
 MYSQL_PORT="3306"
 MYSQL_USER="phabricator"
 
-
 # Read environment variables and validate configuration
 if [ "$MYSQL_LINKED_CONTAINER" != "" ]; then
   MYSQL_HOST_VARIABLE="${MYSQL_LINKED_CONTAINER}_PORT_3306_TCP_ADDR"
@@ -165,7 +164,7 @@ sed -i "s/PHABRICATOR_VCS_USER/$PHABRICATOR_VCS_USER/g" /etc/passwd
 sed -i "s/PHABRICATOR_WWW_USER/$PHABRICATOR_WWW_USER/g" /etc/passwd
 sed "s/__PHABRICATOR_VCS_USER__/$PHABRICATOR_VCS_USER/g" /etc/phabricator-ssh/sshd_config.phabricator.template > /etc/phabricator-ssh/sshd_config.phabricator
 sed "s/__PHABRICATOR_VCS_USER__/$PHABRICATOR_VCS_USER/g" /etc/phabricator-ssh/phabricator-ssh-hook.sh.template > /etc/phabricator-ssh/phabricator-ssh-hook.sh
-sed "s/__PHABRICATOR_WWW_USER__/$PHABRICATOR_WWW_USER/g" /etc/php7.2/fpm/php-fpm.conf.template > /etc/php7.2/fpm/php-fpm.conf
+sed "s/__PHABRICATOR_WWW_USER__/$PHABRICATOR_WWW_USER/g" /etc/php/7.2/fpm/php-fpm.conf.template > /etc/php/7.2/fpm/php-fpm.conf
 
 chmod 755 /etc/phabricator-ssh/phabricator-ssh-hook.sh
 

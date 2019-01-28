@@ -3,6 +3,9 @@ FROM phusion/baseimage:0.11
 EXPOSE 80 443 22 24
 COPY baseline /baseline
 RUN /baseline/setup.sh
+
+RUN apt-get update && apt-get upgrade -y -o Dpkg::Options::="--force-confold"
+
 COPY preflight /preflight
 RUN /preflight/setup.sh
 

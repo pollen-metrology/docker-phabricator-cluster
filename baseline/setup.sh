@@ -20,8 +20,15 @@ fi
 # Install requirements
 apt install -y nginx php-fpm php-mbstring php-mysql php-curl php-gd php-ldap php-fileinfo php-posix php-json php-iconv php-ctype php-zip php-sockets openssl nodejs ca-certificates sudo php-xmlwriter php-opcache imagemagick postfix python-pygments php-apcu
 
+# Websocket module is needed for Aphlict
+npm install -g ws
+
 # Install a few extra things
 apt install -y mariadb-server vim 
+
+# Initial Mariadb setup
+/usr/bin/mysql_install_db --datadir="/var/lib/mysql" --user=mysql --auth-root-authentication-method=socket
+
 
 # Create users and groups
 echo "nginx:x:497:495:user for nginx:/var/lib/nginx:/bin/false" >> /etc/passwd
