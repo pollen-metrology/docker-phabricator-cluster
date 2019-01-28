@@ -3,6 +3,11 @@
 set -e
 set -x
 
+MYSQL_HOST="localhost"
+MYSQL_PORT="3306"
+MYSQL_USER="phabricator"
+
+
 # If this is a derived (baked) image, skip all of this logic.
 if [ -f /baked ]; then
   exit 0
