@@ -26,8 +26,9 @@ mv letsencrypt.sh /app/letsencrypt.sh
 mv 10-boot-conf /app/startup/10-boot-conf
 mv 15-https-conf /app/startup/15-https-conf
 
-mv php-fpm.conf /etc/php5/fpm/php-fpm.conf.template
-mv php.ini /etc/php5/fpm/php.ini
+mkdir -p /etc/php7.2/fpm/
+mv php-fpm.conf /etc/php7.2/fpm/php-fpm.conf.template
+mv php.ini      /etc/php7.2/fpm/php.ini
 
 mv supervisord.conf /app/supervisord.conf
 mv init.sh /app/init.sh
@@ -42,11 +43,11 @@ mv iomonitor /opt/iomonitor
 rm setup.sh
 cd /
 ls /preflight
-rmdir /preflight # This should now be empty; it's an error if it's not.
+rm -rf /preflight # This should now be empty; it's an error if it's not.
 
 # Install PHPExcel
-echo '' >> /etc/php5/fpm/php-fpm.conf
-echo 'php_value[include_path] = "/srv/phabricator/PHPExcel/Classes"' >> /etc/php5/fpm/php-fpm.conf
+echo '' >> /etc/php7.2/fpm/php-fpm.conf
+echo 'php_value[include_path] = "/srv/phabricator/PHPExcel/Classes"' >> /etc/php7.2/fpm/php-fpm.conf
 
 # Move the default SSH to port 24
 echo "" >> /etc/ssh/sshd_config
