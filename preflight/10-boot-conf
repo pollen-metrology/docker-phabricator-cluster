@@ -346,6 +346,14 @@ if [ "$SCRIPT_AFTER_MIGRATION" != "" ]; then
   popd
 fi
 
+if [ "$SECURE_MYSQL" == "yes"]; then
+echo "
+[client]
+ssl
+" >> /srv/phabricator/.my.cnf
+fi
+
+
 # Polish users
 sudo usermod -p NP $PHABRICATOR_VCS_USER
 sudo usermod -s /bin/sh $PHABRICATOR_VCS_USER

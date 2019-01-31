@@ -57,11 +57,6 @@ git clone https://www.github.com/phacility/arcanist.git /srv/phabricator/arcanis
 git clone https://www.github.com/phacility/phabricator.git /srv/phabricator/phabricator
 git clone https://www.github.com/PHPOffice/PHPExcel.git /srv/phabricator/PHPExcel
 
-echo "
-[client]
-ssl
-" >> /srv/phabricator/.my.cnf
-
 cd /
 
 # Clone Let's Encrypt
