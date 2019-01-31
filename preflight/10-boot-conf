@@ -361,5 +361,5 @@ sudo usermod -s /bin/sh $PHABRICATOR_VCS_USER
 GIT_COMMANDS="/usr/bin/git,/usr/bin/git-upload-pack,/usr/bin/git-receive-pack,/usr/bin/ssh"
 echo "$PHABRICATOR_VCS_USER ALL=($PHABRICATOR_DAEMON_USER) SETENV: NOPASSWD:/bin/ls,$GIT_COMMANDS" \
 	> /etc/sudoers.d/phabricator
-echo "$PHABRICATOR_WWW_USER ALL=($PHABRICATOR_DAEMON_USER) SETENV: NOPASSWD:$GIT_COMMANDS" \
+echo "$PHABRICATOR_WWW_USER ALL=($PHABRICATOR_DAEMON_USER) SETENV: NOPASSWD:$GIT_COMMANDS,/usr/lib/git-core/git-http-backend" \
 	>> /etc/sudoers.d/phabricator
