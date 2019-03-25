@@ -47,6 +47,6 @@ The following advanced options allow you to run custom scripts during stages of 
 - `PHABRICATOR_CLUSTER_MAILER_JSON` - Sets cluster.mailers config key. Expects a JSON file.
 - `PHABRICATOR_CLUSTER_ADDRESSES_JSON` - Sets cluster.addresses config key. Expects a JSON file.
 - `PHABRICATOR_CLUSTER_DEVICE_KEY` - Give path to the private key to be used for this cluster device registration. The key is provided by Almanac application, in Phabricator.
-- `PHABRICATOR_CLUSTER_DEVICE_HOST` - When setting up a cluster node, this is the node identifier.
-- `UPGRADE_STORAGE` - Tell the container to upgrade the storage when booting. Do not activate this in cluster setup. Any string will trigger the update.
+- `PHABRICATOR_CLUSTER_DEVICE_HOST` - Give the FQDN or ip address of this cluster node.
+- `UPGRADE_STORAGE` - Tell the container to upgrade the storage when booting. Do not activate this in cluster setup.
 - `PHABRICATOR_ENV_APPEND_PATH_JSON` - Sets environment.append-paths config key. Add some paths to the Phabricator environment.
