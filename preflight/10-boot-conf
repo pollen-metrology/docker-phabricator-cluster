@@ -49,10 +49,6 @@ if [ "$PHABRICATOR_DAEMON_USER" == "" ]; then
   PHABRICATOR_DAEMON_USER=phab-daemon
 fi
 
-if [ "$PHABRICATOR_WWW_USER" == "" ]; then
-  PHABRICATOR_WWW_USER=www-data
-fi
-
 if [ "$PHABRICATOR_STORAGE_TYPE" == "" ]; then
   PHABRICATOR_STORAGE_TYPE=mysql
 fi
@@ -101,10 +97,41 @@ if [ -d /config/keycache ]; then
   PHABRICATOR_HOST_KEYS_PATH="/config/keycache"
 fi
 
+# Add the various compatibility preamble
+# if we are in a cluster installation
+# see https://secure.phabricator.com/book/phabricator/article/configuring_preamble/
+if [ "$IS_CLUSTER_INSTALL" != "" ]; then
+cat > /srv/phabricator/phabricator/support/preamble.php << EOF
+<?php
+
+// Overwrite REMOTE_ADDR with the value in the "X-Forwarded-For" HTTP header.
+
+// Only do this if you're certain the request is coming from a loadbalancer!
+// If the request came directly from a client, doing this will allow them to
+// them spoof any remote address.
+
+// The header may contain a list of IPs, like "1.2.3.4, 4.5.6.7", if the
+// request the load balancer received also had this header.
+
+if (isset(\$_SERVER['HTTP_X_FORWARDED_FOR'])) {
+  \$forwarded_for = \$_SERVER['HTTP_X_FORWARDED_FOR'];
+  if (\$forwarded_for) {
+    \$forwarded_for = explode(',', \$forwarded_for);
+    \$forwarded_for = end(\$forwarded_for);
+    \$forwarded_for = trim(\$forwarded_for);
+    \$_SERVER['REMOTE_ADDR'] = \$forwarded_for;
+  }
+}
+
+// Load balancer terminates the SSL connection
+\$_SERVER['HTTPS'] = true;
+
+EOF
+fi
+
 set +x
 cat >/config.saved <<EOF
 PHABRICATOR_VCS_USER="$PHABRICATOR_VCS_USER"
-PHABRICATOR_WWW_USER="$PHABRICATOR_WWW_USER"
 PHABRICATOR_DAEMON_USER="$PHABRICATOR_DAEMON_USER"
 OVERRIDE_PHABRICATOR_URI="$OVERRIDE_PHABRICATOR_URI"
 OVERRIDE_PHABRICATOR_BRANCH="$OVERRIDE_PHABRICATOR_BRANCH"
@@ -163,10 +190,14 @@ source /config.saved
 # Update the PHABRICATOR_*_USER in config files
 sed -i "s/PHABRICATOR_DAEMON_USER/$PHABRICATOR_DAEMON_USER/g" /etc/passwd
 sed -i "s/PHABRICATOR_VCS_USER/$PHABRICATOR_VCS_USER/g" /etc/passwd
-sed -i "s/PHABRICATOR_WWW_USER/$PHABRICATOR_WWW_USER/g" /etc/passwd
 sed "s/__PHABRICATOR_VCS_USER__/$PHABRICATOR_VCS_USER/g" /etc/phabricator-ssh/sshd_config.phabricator.template > /etc/phabricator-ssh/sshd_config.phabricator
 sed "s/__PHABRICATOR_VCS_USER__/$PHABRICATOR_VCS_USER/g" /etc/phabricator-ssh/phabricator-ssh-hook.sh.template > /etc/phabricator-ssh/phabricator-ssh-hook.sh
-sed "s/__PHABRICATOR_WWW_USER__/$PHABRICATOR_WWW_USER/g" /etc/php7/fpm/php-fpm.conf.template > /etc/php7/fpm/php-fpm.conf
+sed "s/__PHABRICATOR_WWW_USER__/nginx/g" /etc/php7/fpm/php-fpm.conf.template > /etc/php7/fpm/php-fpm.conf
+
+# Update supervisord so that it use rights users for services
+sed -i "s/__PHABRICATOR_WWW_USER__/nginx/g"    		       /app/supervisord.conf
+sed -i "s/__PHABRICATOR_DAEMON_USER__/$PHABRICATOR_DAEMON_USER/g" /app/supervisord.conf
+sed -i "s/__PHABRICATOR_VCS_USER__/$PHABRICATOR_CVS_USER/g"    /app/supervisord.conf
 
 chmod 755 /etc/phabricator-ssh/phabricator-ssh-hook.sh
 
@@ -298,10 +329,10 @@ fi
 
 if [ "$PHABRICATOR_CLUSTER_DEVICE_KEY" != "" ]; then
  /srv/phabricator/phabricator/bin/almanac register \
+  --force \
   --device $PHABRICATOR_CLUSTER_DEVICE_HOST \
   --private-key $PHABRICATOR_CLUSTER_DEVICE_KEY
 fi
-
 
 if [ "$SSL_TYPE" == "none" ]; then
   APHLICT_PROTOCOL="http"
@@ -316,7 +347,7 @@ unset APHLICT_PORT
 popd
 
 if [ "$ENABLE_APCU" != "" ]; then
-  cat >/etc/php7/conf.d/apcu.ini <<EOF
+	  cat >/etc/php7/conf.d/apcu.ini <<EOF
 extension=apcu.so
 EOF
 fi
@@ -347,11 +378,11 @@ if [ "$SCRIPT_AFTER_MIGRATION" != "" ]; then
   popd
 fi
 
-if [ "$SECURE_MYSQL" == "yes"]; then
-echo "
+if [ "$SECURE_MYSQL" == "yes" ]; then
+cat >> /srv/phabricator/.my.cnf << EOF
 [client]
 ssl
-" >> /srv/phabricator/.my.cnf
+EOF
 fi
 
 
@@ -362,5 +393,5 @@ sudo usermod -s /bin/sh $PHABRICATOR_VCS_USER
 GIT_COMMANDS="/usr/bin/git,/usr/bin/git-upload-pack,/usr/bin/git-receive-pack,/usr/bin/ssh"
 echo "$PHABRICATOR_VCS_USER ALL=($PHABRICATOR_DAEMON_USER) SETENV: NOPASSWD:/bin/ls,$GIT_COMMANDS" \
 	> /etc/sudoers.d/phabricator
-echo "$PHABRICATOR_WWW_USER ALL=($PHABRICATOR_DAEMON_USER) SETENV: NOPASSWD:$GIT_COMMANDS,/usr/lib/git-core/git-http-backend" \
+echo "nginx ALL=($PHABRICATOR_DAEMON_USER) SETENV: NOPASSWD:$GIT_COMMANDS,/usr/lib/git-core/git-http-backend" \
 	>> /etc/sudoers.d/phabricator
