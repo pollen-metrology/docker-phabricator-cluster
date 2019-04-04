@@ -2,7 +2,7 @@
 
 This is a Docker image which provides a fully configured Phabricator image, including SSH connectivity to repositories, real-time notifications via Web Sockets and all of the other parts that are normally difficult to configure done for you.
 
-This image is a fork of a [RedpointGames image](https://github.com/RedpointGames/phabricator), which enhancements for cluster configuration.
+This image is a fork of a [RedpointGames image](https://github.com/RedpointGames/phabricator), with enhancements for cluster configuration.
 
 You'll need an instance of MySQL for this Docker image to connect to, and for basic setups you can specify it with either the `MYSQL_LINKED_CONTAINER` or `MYSQL_HOST` environment variables, depending on where your instance of MySQL is.
 
@@ -11,7 +11,7 @@ The most basic command to run Phabricator is:
 ```
 docker run \
     --rm -p 80:80 -p 443:443 -p 22:22 \
-    --env PHABRICATOR_HOST=mydomain.com \
+    --env PHABRICATOR_HOST=phabricator.mydomain.com \
     --env MYSQL_HOST=10.0.0.1 \
     --env MYSQL_USER=user \
     --env MYSQL_PASS=pass \
@@ -19,12 +19,12 @@ docker run \
     --env PHABRICATOR_VCS_USER=vcs-user \
     --env PHABRICATOR_REPOSITORY_PATH=/repos \
     -v /host/repo/path:/repos \
-    redpointgames/phabricator
+    pollenm/phabricator
 ```
 
-Alternatively you can launch this image with Docker Compose. Refer to [Using Docker Compose](https://github.com/RedpointGames/phabricator/blob/master/DOCKER-COMPOSE.md) for more information.
+Alternatively you can launch this image with Docker Compose.
 
-**NOTICE:** This repository has been recently moved to `RedpointGames/phabricator` and the Docker image to use is now `redpointgames/phabricator`.  `hachque/phabricator` will be kept in sync with `redpointgames/phabricator` for the foreseeable future, so you don't need to update your configuration immediately.
+To run a standalone Phabricator stack, you can custom and use the docker-compose.yml.standalone script. It contains information in its header.
 
 ## Configuration
 
@@ -36,9 +36,7 @@ For more advanced configuration topics including:
 * Running custom commands during the boot process, and
 * Baking configuration into your own derived Docker image
 
-refer to [Advanced Configuration](https://github.com/RedpointGames/phabricator/blob/master/ADVANCED-CONFIG.md).
-
-For users that are upgrading to this version and currently using the old `/config` mechanism to configure Phabricator, this configuration mechanism will continue to work, but it's recommended that you migrate to environment variables or baked images when you next get the chance.
+refer to ADVANCED-CONFIG.md.
 
 ## Support
 
