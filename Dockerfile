@@ -1,6 +1,6 @@
 FROM opensuse/leap:15.0
 
-EXPOSE 80 443 22 24
+EXPOSE 80 443 2222 24
 COPY baseline /baseline
 RUN /baseline/repository.sh
 RUN /baseline/setup.sh
