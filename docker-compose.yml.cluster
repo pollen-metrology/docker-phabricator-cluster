@@ -3,10 +3,12 @@
 # Sample version of a Phabricator cluster deployment
 #
 # It creates a private network where all nodes will lie, 192.168.200.0/24
+#
+# Web will take place at 192.168.200.101 ->  192.168.200.150
+# Repositories will take place at 192.168.200.151 -> 192.168.200.200
+# Databases will take place at 192.168.200.201 -> 192.168.200.254
 # 
-# Database will take place at 192.168.200.100
-# 
-# As the container will use 192.168.200.1, nodes ip begin a 192.168.200.2
+# As the container will use 192.168.200.1
 #
 # The node naming convention is:
 # - dbx   for DB nodes, where x is the node number
@@ -37,28 +39,22 @@ services:
      - MYSQL_ROOT_PASSWORD=phabricator
     networks:
       dev_net:
-        ipv4_address: 192.168.200.100
+        ipv4_address: 192.168.200.201
 
   web1:
     container_name: 'phabricator_web1'
     image: pollenm/phabricator
     volumes:
-        - /srv/docker/phabricator/node1/repo:/var/repo
         - /srv/docker/phabricator/node1/config:/config
         - /srv/docker/phabricator/node1/files:/srv/phabricator/files
     restart: always
-    ports:
-      - "192.168.200.2:221:24"
-      - "192.168.200.2:241:22"
-      - "192.168.200.2:881:80"
-      - "192.168.200.2:4431:443"
     networks:
       dev_net:
-        ipv4_address: 192.168.200.2
+        ipv4_address: 192.168.200.101
     environment:
      SSL_TYPE: 'cluster'
      PHABRICATOR_HOST: 'phabricator.domain.com'
-     MYSQL_HOST: 192.168.200.100
+     MYSQL_HOST: 192.168.200.201
      MYSQL_PASS: 'phabricator'
      MYSQL_USER: 'root'
      #PHABRICATOR_REPOSITORY_PATH: '/repos'
@@ -70,15 +66,7 @@ services:
      # PHABRICATOR_CLUSTER_MAILER_JSON: '/config/cluster-mailer.json' 
      # PHABRICATOR_CLUSTER_DEVICE_KEY: '/config/host.key' 
      # PHABRICATOR_CLUSTER_DEVICE_HOST: 'node1.dev' 
-     SCRIPT_AFTER_MIGRATION: '/config/post_migration.sh' 
-
-     # PHABRICATOR_HOST_KEYS_PATH: '/config/ssh/' 
-     #OVERRIDE_PHABRICATOR_URI: 'https://www.github.com/pollen-metrology/phabricator.git'
-     #OVERRIDE_PHABRICATOR_BRANCH: 'master' 
-     #OVERRIDE_LIBPHUTIL_BRANCH: 'use_mysql_client_ssl' 
-     #OVERRIDE_LIBPHUTIL_URI: 'https://github.com/pollen-metrology/libphutil.git' 
-     #GIT_EMAIL: 'admin-team@pollen-metrology.com' 
-     #GIT_USER: 'Pollen Metrology admin team' 
+     IS_CLUSTER_INSTALL: 'true'
 
   repo1:
     container_name: 'phabricator_repo1'
@@ -86,20 +74,14 @@ services:
     volumes:
         - /srv/docker/phabricator/repo1/repo:/var/repo
         - /srv/docker/phabricator/repo1/config:/config
-        - /srv/docker/phabricator/repo1/files:/srv/phabricator/files
     restart: always
-    ports:
-      - "192.168.200.3:222:24"
-      - "192.168.200.3:242:22"
-      - "192.168.200.3:882:80"
-      - "192.168.200.3:4432:443"
     networks:
       dev_net:
-        ipv4_address: 192.168.200.3
+        ipv4_address: 192.168.200.151
     environment:
      SSL_TYPE: 'cluster'
      PHABRICATOR_HOST: 'phabricator.domain.com'
-     MYSQL_HOST: 192.168.200.100
+     MYSQL_HOST: 192.168.200.201
      MYSQL_PASS: 'phabricator'
      MYSQL_USER: 'root'
      PHABRICATOR_REPOSITORY_PATH: '/repos'
@@ -110,7 +92,7 @@ services:
      # PHABRICATOR_CLUSTER_MAILER_JSON: '/config/cluster-mailer.json' 
      # PHABRICATOR_CLUSTER_DEVICE_KEY: '/config/host.key' 
      # PHABRICATOR_CLUSTER_DEVICE_HOST: 'node1.dev' 
-     SCRIPT_AFTER_MIGRATION: '/config/post_migration.sh' 
+     IS_CLUSTER_INSTALL: 'true'
 
 networks:
   dev_net:
