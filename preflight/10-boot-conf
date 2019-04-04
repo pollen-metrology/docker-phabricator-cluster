@@ -100,7 +100,7 @@ fi
 # Add the various compatibility preamble
 # if we are in a cluster installation
 # see https://secure.phabricator.com/book/phabricator/article/configuring_preamble/
-if [ "$IS_CLUSTER_INSTALL" != "" ]; then
+if [ "$ADD_SSL_TERMINATION_PREAMBLE" != "" ]; then
 cat > /srv/phabricator/phabricator/support/preamble.php << EOF
 <?php
 
@@ -216,7 +216,7 @@ if [ "$ENABLE_UPDATE_ON_START" == "true" ]; then
   fi
   git fetch --all
   if [ "$OVERRIDE_LIBPHUTIL_BRANCH" != "" ]; then
-    git branch -m backup_branch
+    git branch -M backup_branch
     git checkout $OVERRIDE_LIBPHUTIL_BRANCH
   fi
   git pull
@@ -228,7 +228,7 @@ if [ "$ENABLE_UPDATE_ON_START" == "true" ]; then
   fi
   git fetch --all
   if [ "$OVERRIDE_ARCANIST_BRANCH" != "" ]; then
-    git branch -m backup_branch
+    git branch -M backup_branch
     git checkout $OVERRIDE_ARCANIST_BRANCH
   fi
   git pull
@@ -240,7 +240,7 @@ if [ "$ENABLE_UPDATE_ON_START" == "true" ]; then
   fi
   git fetch --all
   if [ "$OVERRIDE_PHABRICATOR_BRANCH" != "" ]; then
-    git branch -m backup_branch
+    git branch -M backup_branch
     git checkout $OVERRIDE_PHABRICATOR_BRANCH
     
   fi

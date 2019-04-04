@@ -50,3 +50,4 @@ The following advanced options allow you to run custom scripts during stages of 
 - `PHABRICATOR_CLUSTER_DEVICE_HOST` - Give the FQDN or ip address of this cluster node.
 - `UPGRADE_STORAGE` - Tell the container to upgrade the storage when booting. Do not activate this in cluster setup.
 - `PHABRICATOR_ENV_APPEND_PATH_JSON` - Sets environment.append-paths config key. Add some paths to the Phabricator environment.
+- `ADD_SSL_TERMINATION_PREAMBLE` - Add PHP preamble when the installation is behind a SSL terminator (reverse proxy, load-balancer). See [Phabricator documentation about this](https://secure.phabricator.com/book/phabricator/article/configuring_preamble/).
