@@ -4,7 +4,7 @@ set -e
 set -x
 
 # Install requirements
-zypper --gpg-auto-import-keys --non-interactive in --force-resolution nginx php7-fpm php7-mbstring php7-mysql php7-curl php7-pcntl php7-gd php7-openssl php7-ldap php7-fileinfo php7-posix php7-json php7-iconv php7-ctype php7-zip php7-sockets which python3-Pygments nodejs ca-certificates ca-certificates-mozilla ca-certificates-cacert sudo subversion mercurial php7-xmlwriter php7-opcache ImageMagick postfix glibc-locale git python-pip npm8 hostname php7-APCu
+zypper --gpg-auto-import-keys --non-interactive in --force-resolution nginx php7-zlib php7-fpm php7-mbstring php7-mysql php7-curl php7-pcntl php7-gd php7-openssl php7-ldap php7-fileinfo php7-posix php7-json php7-iconv php7-ctype php7-zip php7-sockets which python3-Pygments nodejs ca-certificates ca-certificates-mozilla ca-certificates-cacert sudo subversion mercurial php7-xmlwriter php7-opcache ImageMagick postfix glibc-locale git python-pip npm8 hostname php7-APCu
 
 npm install -g ws
 pip install supervisor
