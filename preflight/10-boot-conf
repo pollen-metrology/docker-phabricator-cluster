@@ -154,6 +154,7 @@ PHABRICATOR_CLUSTER_ADDRESSES_JSON="$PHABRICATOR_CLUSTER_ADDRESSES_JSON"
 PHABRICATOR_CLUSTER_DEVICE_KEY="$PHABRICATOR_CLUSTER_DEVICE_KEY"
 PHABRICATOR_CLUSTER_DEVICE_HOST="$PHABRICATOR_CLUSTER_DEVICE_HOST"
 PHABRICATOR_ENV_APPEND_PATH_JSON="$PHABRICATOR_ENV_APPEND_PATH_JSON"
+PHABRICATOR_LIBRARIES_JSON="$PHABRICATOR_LIBRARIES_JSON"
 AWS_S3_ACCESS_KEY="$AWS_S3_ACCESS_KEY"
 AWS_S3_SECRET_KEY="$AWS_S3_SECRET_KEY"
 MYSQL_HOST="$MYSQL_HOST"
@@ -290,7 +291,7 @@ if [ "$PHABRICATOR_REPOSITORY_PATH" != "" ]; then
   ./bin/config set repository.default-local-path "$PHABRICATOR_REPOSITORY_PATH"
 fi
 if [ "$PHABRICATOR_STORAGE_TYPE" == "mysql" ]; then
-  ./bin/config set storage.mysql-engine.max-size 67108864
+  ./bin/config set storage.mysql-engine.max-size 2097152
 fi
 if [ "$PHABRICATOR_STORAGE_TYPE" == "disk" ]; then
   ./bin/config set storage.mysql-engine.max-size 0
@@ -325,6 +326,10 @@ fi
 
 if [ "$PHABRICATOR_ENV_APPEND_PATH_JSON" != "" ]; then
 	./bin/config set environment.append-paths --stdin < $PHABRICATOR_ENV_APPEND_PATH_JSON
+fi
+
+if [ "$PHABRICATOR_LIBRARIES_JSON" != "" ]; then
+	./bin/config set load-libraries --stdin < $PHABRICATOR_LIBRARIES_JSON
 fi
 
 if [ "$PHABRICATOR_CLUSTER_DEVICE_KEY" != "" ]; then
