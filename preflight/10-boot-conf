@@ -200,6 +200,8 @@ sed -i "s/__PHABRICATOR_WWW_USER__/nginx/g"    		       /app/supervisord.conf
 sed -i "s/__PHABRICATOR_DAEMON_USER__/$PHABRICATOR_DAEMON_USER/g" /app/supervisord.conf
 sed -i "s/__PHABRICATOR_VCS_USER__/$PHABRICATOR_CVS_USER/g"    /app/supervisord.conf
 
+# Set phab-deamon as owner of /srv/phabricator
+chown phab-daemon /srv/phabricator/
 chmod 755 /etc/phabricator-ssh/phabricator-ssh-hook.sh
 
 
