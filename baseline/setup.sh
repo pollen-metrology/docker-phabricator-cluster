@@ -34,6 +34,11 @@ git clone https://www.github.com/phacility/libphutil.git /srv/phabricator/libphu
 git clone https://www.github.com/phacility/arcanist.git /srv/phabricator/arcanist
 git clone https://www.github.com/phacility/phabricator.git /srv/phabricator/phabricator
 git clone https://www.github.com/PHPOffice/PHPExcel.git /srv/phabricator/PHPExcel
+git clone https://github.com/pollen-metrology/phabricator-extensions-Sprint.git /srv/phabricator/Sprint-extension
+
+# Set phab-deamon as owner of /srv/phabricator
+chown phab-daemon /srv/phabricator/
+chmod +x /etc/phabricator-ssh/phabricator-ssh-hook.sh
 
 
 # Clone Let's Encrypt
