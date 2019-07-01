@@ -379,12 +379,6 @@ pushd /srv/phabricator/phabricator
 bin/config set phabricator.show-prototypes true
 popd
 
-if [ "$SCRIPT_AFTER_MIGRATION" != "" ]; then
-  pushd /srv/phabricator/phabricator
-  $SCRIPT_AFTER_MIGRATION
-  popd
-fi
-
 if [ "$SECURE_MYSQL" == "yes" ]; then
 cat >> /srv/phabricator/.my.cnf << EOF
 [client]
@@ -396,6 +390,9 @@ fi
 # Polish users
 sudo usermod -p NP $PHABRICATOR_VCS_USER
 sudo usermod -s /bin/sh $PHABRICATOR_VCS_USER
+
+# Ensure that /var/repo has phab-daemon as owner
+sudo chown -R 2001 /var/repo
 
 GIT_COMMANDS="/usr/bin/git,/usr/bin/git-upload-pack,/usr/bin/git-receive-pack,/usr/bin/ssh"
 echo "$PHABRICATOR_VCS_USER ALL=($PHABRICATOR_DAEMON_USER) SETENV: NOPASSWD:/bin/ls,$GIT_COMMANDS" \
